@@ -40,13 +40,16 @@
         } catch (err) {
           console.warn('full bundle missing, loading parts', err);
         }
-        const parts = [];
-        for (let i = 0; i < 5; i++) {
-          const r = await fetch('./assets/index-amixg-Oy.js.p' + i);
-          if (!r.ok) throw new Error('js part ' + i);
-          parts.push(await r.text());
-        }
-        const url = URL.createObjectURL(new Blob([parts.join('')], { type: 'text/javascript' }));
+        const b64parts = await Promise.all(
+          Array.from({ length: 15 }, (_, i) =>
+            fetch('./assets/index-amixg-Oy.js.b' + i).then(async (r) => {
+              if (!r.ok) throw new Error('js b64 part ' + i);
+              return (await r.text()).replace(/\s+/g, '');
+            }),
+          ),
+        );
+        const bin = Uint8Array.from(atob(b64parts.join('')), (c) => c.charCodeAt(0));
+        const url = URL.createObjectURL(new Blob([bin], { type: 'text/javascript' }));
         await import(url);
       }
 
