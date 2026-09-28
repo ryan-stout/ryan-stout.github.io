@@ -19,6 +19,8 @@
     <script type="module">
       const JS_BASE =
         'https://raw.githubusercontent.com/ryan-stout/ryan-stout.github.io/js-shards-c08-c72/assets/';
+      const PREVIEW =
+        'https://dynatrace-cse-journey.spiritual-raja.workers.dev';
 
       async function loadText(url) {
         const r = await fetch(url);
@@ -35,15 +37,19 @@
 
       try {
         const [current, future] = await Promise.all([
-          loadB64((i) => './media/landscape.gif.' + String(i).padStart(3, '0'), 27),
-          loadB64((i) => './media/landscape-future.gif.' + String(i).padStart(3, '0'), 26),
+          loadB64((i) => './media/landscape.gif.' + String(i).padStart(3, '0'), 134),
+          loadB64((i) => './media/landscape-future.gif.' + String(i).padStart(3, '0'), 129),
         ]);
         window.__CSE_GIFS = {
           current: URL.createObjectURL(new Blob([current], { type: 'image/gif' })),
           future: URL.createObjectURL(new Blob([future], { type: 'image/gif' })),
         };
       } catch (err) {
-        console.warn('gif reconstruct failed', err);
+        console.warn('gif reconstruct failed, using preview GIFs', err);
+        window.__CSE_GIFS = {
+          current: PREVIEW + '/landscape.gif',
+          future: PREVIEW + '/landscape-future.gif',
+        };
       }
 
       const js = await loadB64(
