@@ -17,38 +17,19 @@
   <body>
     <div id="root"></div>
     <script type="module">
-      async function loadChunk(name, i) {
-        const id = String(i).padStart(3, '0');
-        const r = await fetch('./chunks/' + name + '.' + id);
-        if (r.ok) {
-          const t = (await r.text()).replace(/\s+/g, '');
-          if (t.length >= 40000) return t;
-        }
-        const p15 = await Promise.all(
-          [0, 1, 2].map((p) =>
-            fetch('./chunks/_parts/' + name + '.' + id + '.p' + p).then((resp) =>
-              resp.ok ? resp.text() : '',
-            ),
-          ),
-        );
-        const joined15 = p15.join('').replace(/\s+/g, '');
-        if (joined15.length >= 40000) return joined15;
-        const parts = await Promise.all(
-          Array.from({ length: 9 }, (_, p) =>
-            fetch('./chunks/_parts/' + name + '.' + id + '/' + p).then((resp) => {
-              if (!resp.ok) throw new Error('missing ' + name + ' ' + i + ' part ' + p);
-              return resp.text();
-            }),
-          ),
-        );
-        return parts.join('');
+      async function loadText(path) {
+        const r = await fetch(path);
+        if (!r.ok) throw new Error(path + ' ' + r.status);
+        return (await r.text()).replace(/\s+/g, '');
       }
 
       async function loadGif(name, count) {
-        const texts = await Promise.all(
-          Array.from({ length: count }, (_, i) => loadChunk(name, i)),
+        const parts = await Promise.all(
+          Array.from({ length: count }, (_, i) =>
+            loadText('./chunks/' + name + '.' + String(i).padStart(3, '0')),
+          ),
         );
-        const bin = Uint8Array.from(atob(texts.join('')), (c) => c.charCodeAt(0));
+        const bin = Uint8Array.from(atob(parts.join('')), (c) => c.charCodeAt(0));
         return URL.createObjectURL(new Blob([bin], { type: 'image/gif' }));
       }
 
@@ -60,23 +41,23 @@
           console.warn('full bundle missing, loading parts', err);
         }
         const parts = [];
-        for (let i = 0; i < 10; i++) {
-          parts.push(
-            fetch('./assets/index-amixg-Oy.js.part' + String(i).padStart(2, '0')).then((r) => {
-              if (!r.ok) throw new Error('js part ' + i);
-              return r.text();
-            }),
-          );
+        for (let i = 0; i < 5; i++) {
+          const r = await fetch('./assets/index-amixg-Oy.js.p' + i);
+          if (!r.ok) throw new Error('js part ' + i);
+          parts.push(await r.text());
         }
-        const code = (await Promise.all(parts)).join('');
-        const url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+        const url = URL.createObjectURL(new Blob([parts.join('')], { type: 'text/javascript' }));
         await import(url);
       }
 
-      window.__CSE_GIFS = {
-        current: await loadGif('landscape.gif', 94),
-        future: await loadGif('landscape-future.gif', 93),
-      };
+      try {
+        window.__CSE_GIFS = {
+          current: await loadGif('landscape.gif', 11),
+          future: await loadGif('landscape-future.gif', 11),
+        };
+      } catch (err) {
+        console.warn('gif reconstruct failed', err);
+      }
       await loadApp();
     </script>
   </body>
