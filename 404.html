@@ -17,57 +17,40 @@
   <body>
     <div id="root"></div>
     <script type="module">
-      async function loadText(path) {
-        const r = await fetch(path);
-        if (!r.ok) throw new Error(path + ' ' + r.status);
+      const JS_BASE =
+        'https://raw.githubusercontent.com/ryan-stout/ryan-stout.github.io/js-shards-c08-c72/assets/';
+
+      async function loadText(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(url + ' ' + r.status);
         return (await r.text()).replace(/\s+/g, '');
       }
 
-      async function loadGif(name, count) {
+      async function loadB64(urlFor, count) {
         const parts = await Promise.all(
-          Array.from({ length: count }, (_, i) =>
-            loadText('./chunks/' + name + '.' + String(i).padStart(3, '0')),
-          ),
+          Array.from({ length: count }, (_, i) => loadText(urlFor(i))),
         );
-        const bin = Uint8Array.from(atob(parts.join('')), (c) => c.charCodeAt(0));
-        return URL.createObjectURL(new Blob([bin], { type: 'image/gif' }));
-      }
-
-      async function loadApp() {
-        try {
-          await import('./assets/index-amixg-Oy.js');
-          return;
-        } catch (err) {
-          console.warn('full bundle missing, loading parts', err);
-        }
-        const remoteBase = 'https://raw.githubusercontent.com/ryan-stout/ryan-stout.github.io/js-shards-c08-c72/assets/';
-        const b64parts = await Promise.all(
-          Array.from({ length: 73 }, (_, i) => {
-            const name = 'index-amixg-Oy.js.c' + String(i).padStart(2, '0');
-            return fetch('./assets/' + name).then(async (r) => {
-              if (!r.ok) throw new Error('js b64 part ' + i);
-              return (await r.text()).replace(/\s+/g, '');
-            }).catch(async () => {
-              const r = await fetch(remoteBase + name);
-              if (!r.ok) throw new Error('js b64 part ' + i);
-              return (await r.text()).replace(/\s+/g, '');
-            });
-          }),
-        );
-        const bin = Uint8Array.from(atob(parts.join('')), (c) => c.charCodeAt(0));
-        const url = URL.createObjectURL(new Blob([bin], { type: 'text/javascript' }));
-        await import(url);
+        return Uint8Array.from(atob(parts.join('')), (c) => c.charCodeAt(0));
       }
 
       try {
+        const [current, future] = await Promise.all([
+          loadB64((i) => './media/landscape.gif.' + String(i).padStart(3, '0'), 27),
+          loadB64((i) => './media/landscape-future.gif.' + String(i).padStart(3, '0'), 26),
+        ]);
         window.__CSE_GIFS = {
-          current: await loadGif('landscape.gif', 11),
-          future: await loadGif('landscape-future.gif', 11),
+          current: URL.createObjectURL(new Blob([current], { type: 'image/gif' })),
+          future: URL.createObjectURL(new Blob([future], { type: 'image/gif' })),
         };
       } catch (err) {
         console.warn('gif reconstruct failed', err);
       }
-      await loadApp();
+
+      const js = await loadB64(
+        (i) => JS_BASE + 'index-amixg-Oy.js.c' + String(i).padStart(2, '0'),
+        73,
+      );
+      await import(URL.createObjectURL(new Blob([js], { type: 'text/javascript' })));
     </script>
   </body>
 </html>
