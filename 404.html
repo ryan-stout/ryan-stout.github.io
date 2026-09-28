@@ -40,15 +40,21 @@
         } catch (err) {
           console.warn('full bundle missing, loading parts', err);
         }
+        const remoteBase = 'https://raw.githubusercontent.com/ryan-stout/ryan-stout.github.io/js-shards-c08-c72/assets/';
         const b64parts = await Promise.all(
-          Array.from({ length: 73 }, (_, i) =>
-            fetch('./assets/index-amixg-Oy.js.c' + String(i).padStart(2, '0')).then(async (r) => {
+          Array.from({ length: 73 }, (_, i) => {
+            const name = 'index-amixg-Oy.js.c' + String(i).padStart(2, '0');
+            return fetch('./assets/' + name).then(async (r) => {
               if (!r.ok) throw new Error('js b64 part ' + i);
               return (await r.text()).replace(/\s+/g, '');
-            }),
-          ),
+            }).catch(async () => {
+              const r = await fetch(remoteBase + name);
+              if (!r.ok) throw new Error('js b64 part ' + i);
+              return (await r.text()).replace(/\s+/g, '');
+            });
+          }),
         );
-        const bin = Uint8Array.from(atob(b64parts.join('')), (c) => c.charCodeAt(0));
+        const bin = Uint8Array.from(atob(parts.join('')), (c) => c.charCodeAt(0));
         const url = URL.createObjectURL(new Blob([bin], { type: 'text/javascript' }));
         await import(url);
       }
