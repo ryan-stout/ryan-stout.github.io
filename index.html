@@ -24,6 +24,15 @@
           const t = (await r.text()).replace(/\s+/g, '');
           if (t.length >= 40000) return t;
         }
+        const p15 = await Promise.all(
+          [0, 1, 2].map((p) =>
+            fetch('./chunks/_parts/' + name + '.' + id + '.p' + p).then((resp) =>
+              resp.ok ? resp.text() : '',
+            ),
+          ),
+        );
+        const joined15 = p15.join('').replace(/\s+/g, '');
+        if (joined15.length >= 40000) return joined15;
         const parts = await Promise.all(
           Array.from({ length: 9 }, (_, p) =>
             fetch('./chunks/_parts/' + name + '.' + id + '/' + p).then((resp) => {
