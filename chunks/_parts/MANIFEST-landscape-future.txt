@@ -1,0 +1,22 @@
+landscape-future.gif.010 reconstruction
+Concat in this order (raw ASCII, then base64 -d):
+
+chunks/_parts/landscape-future.gif.010.s00   20000  sha 692f22fb42be2cfa7cbc3dad300accece1bba473
+chunks/_parts/landscape-future.gif.010.s01   20000  sha a2eccff3a25574e9bdaa4e486a4dfa590c484e0c
+chunks/_parts/landscape-future.gif.010.s02.0 10000  sha 90906cf8db09aab08d87f740beda5c16e6948196
+chunks/_parts/landscape-future.gif.010.s02.1 10000  sha 0167eb0a5cca0634712d75bc1a943cccb929971a
+chunks/_parts/landscape-future.gif.010.r00   5000   sha 69a5b791b2251e362901270f57046adc079a3e8d
+chunks/_parts/landscape-future.gif.010.r01   5000   sha 61ac96a065b20db028c24661d93feb997353018b
+chunks/_parts/landscape-future.gif.010.r02   5000   sha 660d6f9b3b6aba3f6779b8f54d389d476d20177f
+chunks/_parts/landscape-future.gif.010.r03   5000   sha 0beb1bea300e0346545c1c3dba62d72e16f1c73e
+chunks/_parts/landscape-future.gif.010.r04   5000   sha 2eeeb15c8e93ec782054b7611f2edc2ac45c6ed9
+chunks/_parts/landscape-future.gif.010.r05 .. r21  5000 each
+chunks/_parts/landscape-future.gif.010.r22   4872   sha 2de2084c27f9cf53738b31348cf045f091453993
+
+IGNORE truncated/corrupt:
+chunks/landscape-future.gif.000 .. .010 (full files truncated ~8-45KB)
+chunks/_parts/landscape-future.gif.010.s02 (truncated)
+chunks/_parts/landscape-future.gif.010.s03.0 (corrupt 9992)
+
+Full 391KB chunks and 100KB p0-p3 4-way parts cannot pass GitHub MCP payload limits.
+5KB slices are SHA-verified. Remaining .000-.009 need the same 5KB treatment.
